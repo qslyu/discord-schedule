@@ -4,7 +4,7 @@ import { Button, IconButton } from '@chakra-ui/button'
 import { FormControl, FormErrorMessage, FormLabel } from '@chakra-ui/form-control'
 import { AddIcon, DeleteIcon } from '@chakra-ui/icons'
 import { Input } from '@chakra-ui/input'
-import { Box, Center, Flex, Heading } from '@chakra-ui/layout'
+import { Box, Center, Flex, Heading, Spacer } from '@chakra-ui/layout'
 import { Textarea } from '@chakra-ui/textarea'
 import Header from '../../components/header'
 import { useToast } from '@chakra-ui/toast'
@@ -87,68 +87,78 @@ export default function Create() {
     <>
       <Header />
       <Center>
-        <Box p="10" width={{base: "100%", sm: "70%"}}>
-          <Heading size="xl" as="h2">新規作成</Heading>
-            
-            <FormControl isInvalid={showError && validateEventName(name)} isRequired mt="12">
-              <FormLabel>イベント名</FormLabel>
-              <Input value={name} w={{base: "100%", md: 350}} onChange={(e) => setName(e.target.value)} />
-              <FormErrorMessage>{validateEventName(name)}</FormErrorMessage>
-            </FormControl>
+        <Box p="10" w={{base: "100%", md: "60%"}}>
+        <Heading size="xl" as="h2">新規作成</Heading>
+          <Box display={{ lg: "flex" }} mt="12">
+            <Box w={{base: "100%", lg: "48%"}}>
+              <FormControl isInvalid={showError && validateEventName(name)} isRequired>
+                <FormLabel>イベント名</FormLabel>
+                <Input value={name} w="100%" onChange={(e) => setName(e.target.value)} />
+                <FormErrorMessage>{validateEventName(name)}</FormErrorMessage>
+              </FormControl>
 
-            <FormControl isInvalid={showError && validateDescription(description)} mt="6">
-              <FormLabel>イベントの説明</FormLabel>
-              <Textarea value={description} w={{base: "100%", md: 350}} onChange={(e) => setDescription(e.target.value)} />
-              <FormErrorMessage>{validateDescription(description)}</FormErrorMessage>
-            </FormControl>
+              <FormControl isInvalid={showError && validateDescription(description)} mt="6">
+                <FormLabel>イベントの説明</FormLabel>
+                <Textarea value={description} w="100%" onChange={(e) => setDescription(e.target.value)} />
+                <FormErrorMessage>{validateDescription(description)}</FormErrorMessage>
+              </FormControl>
+            </Box>
 
-            <FormControl isInvalid={showError && !datetime && validateSchedule(schedule)} w={{base: "100%", md: 350}} mt="6">
-              <FormLabel>日程</FormLabel>
+            <Spacer />
 
-              {schedule.map((d, index) => (
-                <Flex key={index}>
-                  <Input 
-                    value={d}
-                    onChange={(e) => {
-                      setSchedule([...schedule.slice(0, index), e.target.value, ...schedule.slice(index + 1)])
-                    }}
-                    mr="1" 
-                    mb="1" 
-                    type="datetime-local"
-                    min={nowTimeStamp}
-                  />
+            <Box w={{base: "100%", lg: "48%"}}>
+              <FormControl isInvalid={showError && !datetime && validateSchedule(schedule)}>
+                <FormLabel>日程</FormLabel>
+
+                {schedule.map((d, index) => (
+                  <Flex key={index}>
+                    <Input
+                      value={d}
+                      onChange={(e) => {
+                        setSchedule([...schedule.slice(0, index), e.target.value, ...schedule.slice(index + 1)])
+                      }}
+                      mr="1"
+                      mb="1"
+                      type="datetime-local"
+                      min={nowTimeStamp}
+                    />
+                    <IconButton 
+                      onClick={() => {
+                        setSchedule(schedule.filter((a, i) => i != index))
+                      }}
+                      icon={<DeleteIcon />}
+                    />
+                  </Flex>
+                ))}
+
+                <Flex>
+                  <Input mr="1" value={datetime} onChange={(e) => {setDatetime(e.target.value)}} type="datetime-local" min={nowTimeStamp} />
                   <IconButton 
                     onClick={() => {
-                      setSchedule(schedule.filter((a, i) => i != index))
+                      if(datetime) {
+                        setSchedule([...schedule, datetime])
+                        setDatetime('')
+                      }
                     }}
-                    icon={<DeleteIcon />}
+                    icon={<AddIcon />}
                   />
                 </Flex>
-              ))}
-              
-              <Flex>
-                <Input value={datetime} onChange={(e) => {setDatetime(e.target.value)}} mr="1" type="datetime-local" min={nowTimeStamp} />
-                <IconButton 
-                  onClick={() => {
-                    if(datetime) {
-                      setSchedule([...schedule, datetime])
-                      setDatetime('')
-                    }
-                  }}
-                  icon={<AddIcon />}
-                />
-              </Flex>
-              <FormErrorMessage>{validateSchedule(schedule)}</FormErrorMessage>
-            </FormControl>
 
-            <Button
-              type="submit"
-              isLoading={isSending}
-              mt="12"
-              onClick={submit}
-            >
-              作成
-            </Button>
+                <FormErrorMessage>{validateSchedule(schedule)}</FormErrorMessage>
+
+              </FormControl>
+            </Box>
+          </Box>
+
+          <Button
+            type="submit"
+            isLoading={isSending}
+            mt="12"
+            onClick={submit}
+          >
+            作成
+          </Button>
+
         </Box>
       </Center>
     </>

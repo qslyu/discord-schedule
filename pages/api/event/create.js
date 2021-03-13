@@ -1,5 +1,4 @@
 import { getSession } from 'next-auth/client'
-import { v4 as uuidv4 } from 'uuid'
 import { connectToDatabase } from '../../../util/mongodb'
 import { validateEventName, validateDescription, validateSchedule } from '../../../util/validate'
 
@@ -9,7 +8,8 @@ export default async (req, res) => {
   if (session) {
     const { db } = await connectToDatabase()
 
-    const id =  uuidv4()
+    let id
+    const userId = session.user.uid
     const eventName = req.body.name
     const description = req.body.description
     const schedule = req.body.schedule
@@ -46,16 +46,16 @@ export default async (req, res) => {
     await db
       .collection('events')
       .insertOne({
-        eventID: id,
-        contributor: {
-          name: session.user.name,
-          email: session.user.email
-        },
+        contributor_id: userId,
         name:         escape(eventName),
         description:  escape(description),
         schedule: escapedSchedule,
         createdAt: new Date(Date.now())
       })
+      .then((result) => {
+        id = result.insertedId
+      })
+
     res.send({ "success": true, "url": `/event/${id}` })
   } else {
     res.status(401)

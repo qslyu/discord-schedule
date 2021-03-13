@@ -5,6 +5,8 @@ import { fetcher } from '../../util/fetcher'
 import { Box, Center, Heading, Text } from '@chakra-ui/layout'
 import { Table, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/table'
 import DateTimeFormat from '../../util/dateTimeFormat'
+import { BsFillCircleFill, BsFillExclamationCircleFill, BsFillDashCircleFill } from 'react-icons/bs'
+import Icon from '@chakra-ui/icon'
 
 export default function Event() {
   const router = useRouter()
@@ -21,9 +23,9 @@ export default function Event() {
       <Header />
       {data ? (
         <Center>
-          <Box p="10" width={{base: "100%", sm: "70%"}}>
+          <Box p="10" w={{base: "100%", md: "60%"}}>
             <Heading size="xl" as="h2" mb= "6">{unescape(data.name)}</Heading>
-            <Text mb="6">製作者: {data.contributor.name}</Text>
+            <Text mb="6">製作者: {data.contributor}</Text>
             <Text mb="6">{data.description}</Text>
   
             <Table variant="simple">
@@ -36,9 +38,9 @@ export default function Event() {
                 {data.schedule.map((d, i) => (
                   <Tr key={i}>
                     <Td>{DateTimeFormat(d.date)}〜</Td>
-                    <Td bg="green">&#x2b55; {d.users.excellent.length}</Td>
-                    <Td>&#x1f53a; {d.users.excellent.length}</Td>
-                    <Td>&#x274c; {d.users.excellent.length}</Td>
+                    <Td><Icon as={BsFillCircleFill} color="green.400" /> {d.users.excellent.length}</Td>
+                    <Td><Icon as={BsFillExclamationCircleFill} color="yellow.400" /> {d.users.excellent.length}</Td>
+                    <Td><Icon as={BsFillDashCircleFill} color="red.400" /> {d.users.excellent.length}</Td>
                   </Tr>
                 ))}
               </Tbody>
