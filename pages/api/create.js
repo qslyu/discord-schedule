@@ -1,6 +1,6 @@
 import { getSession } from 'next-auth/client'
-import { connectToDatabase } from '../../../util/mongodb'
-import { validateEventName, validateDescription, validateSchedule } from '../../../util/validate'
+import { connectToDatabase } from '../../util/mongodb'
+import { validateEventName, validateDescription, validateSchedule } from '../../util/validate'
 
 export default async (req, res) => {
   const session = await getSession({ req })

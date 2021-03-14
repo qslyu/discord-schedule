@@ -1,6 +1,6 @@
-export default function DateTimeFormat (d) {
+export default function DateTimeFormat (d, locale) {
   return new Intl.DateTimeFormat(
-    'ja-JP', 
+    locale, 
     { 
       year:     'numeric', 
       month:    '2-digit', 

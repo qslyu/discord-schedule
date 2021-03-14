@@ -6,14 +6,16 @@ import { AddIcon, DeleteIcon } from '@chakra-ui/icons'
 import { Input } from '@chakra-ui/input'
 import { Box, Center, Flex, Heading, Spacer } from '@chakra-ui/layout'
 import { Textarea } from '@chakra-ui/textarea'
-import Header from '../../components/header'
+import Header from '../components/header'
 import { useToast } from '@chakra-ui/toast'
-import { validateEventName, validateDescription, validateSchedule } from '../../util/validate'
-import getTimeStamp from '../../util/getTimeStamp'
+import { validateEventName, validateDescription, validateSchedule } from '../util/validate'
+import getTimeStamp from '../util/getTimeStamp'
+import useLocale from '../hooks/useLocale'
 
 export default function Create() {
   const router = useRouter()
   const toast = useToast()
+  const { locale, t } = useLocale()
 
   const [showError, setShowError] = useState(false)
   const [name, setName] = useState('')
@@ -57,7 +59,7 @@ export default function Create() {
       "schedule": scheduleDate
     }
 
-    fetch('/api/event/create', {
+    fetch('/api/create', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -68,7 +70,7 @@ export default function Create() {
     .then(data => {
       if(data.success) {
         setIsSending(false)
-        router.push(data.url)
+        router.push(data.url, data.url, { locale: locale })
       }
     })
     .catch(err => {
@@ -88,17 +90,17 @@ export default function Create() {
       <Header />
       <Center>
         <Box p="10" w={{base: "100%", md: "60%"}}>
-        <Heading size="xl" as="h2">新規作成</Heading>
+        <Heading size="xl" as="h2">{t.NEW_EVENT}</Heading>
           <Box display={{ lg: "flex" }} mt="12">
             <Box w={{base: "100%", lg: "48%"}}>
               <FormControl isInvalid={showError && validateEventName(name)} isRequired>
-                <FormLabel>イベント名</FormLabel>
+                <FormLabel>{t.EVENT_NAME}</FormLabel>
                 <Input value={name} w="100%" onChange={(e) => setName(e.target.value)} />
                 <FormErrorMessage>{validateEventName(name)}</FormErrorMessage>
               </FormControl>
 
               <FormControl isInvalid={showError && validateDescription(description)} mt="6">
-                <FormLabel>イベントの説明</FormLabel>
+                <FormLabel>{t.EVENT_DESCRIPTION}</FormLabel>
                 <Textarea value={description} w="100%" onChange={(e) => setDescription(e.target.value)} />
                 <FormErrorMessage>{validateDescription(description)}</FormErrorMessage>
               </FormControl>
@@ -108,7 +110,7 @@ export default function Create() {
 
             <Box w={{base: "100%", lg: "48%"}}>
               <FormControl isInvalid={showError && !datetime && validateSchedule(schedule)}>
-                <FormLabel>日程</FormLabel>
+                <FormLabel>{t.EVENT_SCHEDULE}</FormLabel>
 
                 {schedule.map((d, index) => (
                   <Flex key={index}>
@@ -156,7 +158,7 @@ export default function Create() {
             mt="12"
             onClick={submit}
           >
-            作成
+            {t.CREATE_EVENT}
           </Button>
 
         </Box>

@@ -1,4 +1,5 @@
 import NextAuth from 'next-auth'
+import { signIn } from 'next-auth/client'
 import Providers from 'next-auth/providers'
 
 export default NextAuth({
@@ -32,6 +33,12 @@ export default NextAuth({
       clientSecret: process.env.DISCORD_CLIENT_SECRET
     }
   ],
+
+  events: {
+    async signIn(message) {
+      // Update profile
+    }
+  },
 
   callbacks: {
     async session(session, user) {

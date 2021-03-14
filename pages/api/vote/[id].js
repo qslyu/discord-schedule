@@ -5,19 +5,10 @@ import { connectToDatabase } from '../../../util/mongodb'
 export default async ({ query: { id } }, res) => {
   const { db } = await connectToDatabase()
 
-  let ObjId
-
-  try {
-    ObjId = ObjectId(id)
-  } catch {
-    res.status(404)
-    res.send({ error: "not found" })
-  }
-
   const data = await db
     .collection('events')
     .findOne({
-      _id: ObjId
+      _id: ObjectId(id)
     })
 
   if(data) {
@@ -28,7 +19,7 @@ export default async ({ query: { id } }, res) => {
       schedule:     data.schedule
     })
   } else {
-    res.status(404)
-    res.send({ error: "not found" })
+    res.status(400)
+    res.send({ error: "bad request" })
   }
 }
