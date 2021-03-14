@@ -10,9 +10,7 @@ export default function useLocale(isTopPage) {
   let t = en
 
   if(!isTopPage) useEffect(() => {
-    if(router.pathname.substr(1, 2) != locale) {
-      router.push('', '', { locale: window.navigator.language.substr(0, 2) })
-    }
+    router.push('', '', { locale: window.navigator.language.substr(0, 2) })
   },[])
 
   if(locale == 'ja') t = ja
