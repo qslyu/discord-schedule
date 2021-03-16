@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Header from '../../components/header'
 import useSWR from 'swr'
@@ -16,11 +17,7 @@ export default function Event() {
   const { id } = router.query
   const { locale, t } = useLocale()
 
-  if(!id) {
-    return null
-  }
-
-  const { data, error } = useSWR(`/api/event/${id}`, fetcher)
+  const { data, error } = useSWR(id?`/api/event/${id}`:null, id?fetcher:null)
   
   return (
     <>
