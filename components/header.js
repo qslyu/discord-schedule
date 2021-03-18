@@ -1,5 +1,5 @@
 import { signIn, signOut, useSession } from 'next-auth/client'
-import { Avatar, Box, Button, Center, Flex, Heading, HStack, Image, Icon, IconButton, Menu, MenuButton, MenuItem, MenuList, Spacer, Text } from '@chakra-ui/react'
+import { Avatar, Box, Button, Center, Flex, Heading, HStack, Image, Icon, IconButton, Menu, MenuButton, MenuItem, MenuList, Spacer, Text, SkeletonCircle, Skeleton } from '@chakra-ui/react'
 import { ChevronDownIcon } from '@chakra-ui/icons'
 import { FaDiscord } from 'react-icons/fa'
 import useLocale from '../hooks/useLocale'
@@ -12,7 +12,6 @@ export default function Header() {
 
   const router = useRouter()
 
-
   return (
     <Center>
       <Box p="6" width={{base: "100%", md: "60%"}}>
@@ -24,7 +23,7 @@ export default function Header() {
 
           <Box>
             {!session && <>
-              <Button onClick={() => signIn()}><Icon mr="3" as={FaDiscord} /> {t.SIGN_IN}</Button>
+              <Button onClick={() => signIn('discord')}><Icon mr="3" as={FaDiscord} /> {t.SIGN_IN}</Button>
             </>}
             {session && <>
               <Menu>
