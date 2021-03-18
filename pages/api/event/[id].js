@@ -12,6 +12,7 @@ export default async ({ query: { id } }, res) => {
   } catch {
     res.status(404)
     res.send({ error: "not found" })
+    return
   }
 
   const data = await db
