@@ -14,7 +14,7 @@ export default function useLocale(isTopPage) {
   const isEmpty = pageName[0] == '[' && pageName.substr(-1) == ']'
 
   useEffect(() => {
-    if(!isTopPage && !isEmpty) router.push('', '', { locale: window.navigator.language.substr(0, 2) })
+    if(!isTopPage && !isEmpty) router.push(router.asPath, router.asPath, { locale: window.navigator.language.substr(0, 2) })
   },[])
 
   if(locale == 'ja') t = ja
