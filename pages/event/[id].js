@@ -53,7 +53,7 @@ export default function Event() {
       <Center>
         <Box p="10" w={{base: "100%", md: "60%"}}>
           <Heading size="xl" as="h2" mb= "6">{data ? data.name: (<Skeleton >dammy</Skeleton>)}</Heading>
-          <Text mb="6">{data ? `${t.CONTRIBUTOR}: ${data.contributor}`: (<Skeleton w="10px" />)}</Text>
+          <Text mb="6">{data ? `${t.CONTRIBUTOR}: ${data.contributor}`: (<Skeleton>dammy</Skeleton>)}</Text>
           <Text mb="6">{data ? data.description: (<Skeleton>dammy</Skeleton>)}</Text>
 
 
