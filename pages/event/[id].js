@@ -52,10 +52,9 @@ export default function Event() {
       <Header />
       <Center>
         <Box p="10" w={{base: "100%", md: "60%"}}>
-          <Heading size="xl" as="h2" mb= "6">{data ? data.name: (<Skeleton >dammy</Skeleton>)}</Heading>
-          <Text mb="6">{data ? `${t.CONTRIBUTOR}: ${data.contributor}`: (<Skeleton>dammy</Skeleton>)}</Text>
-          <Text mb="6">{data ? data.description: (<Skeleton>dammy</Skeleton>)}</Text>
-
+          {data ? <Heading size="xl" as="h2" mb= "6">{data.name}</Heading> : <Skeleton mb= "6"><Heading size="xl">loading</Heading></Skeleton>}
+          {data ? <Text mb="6">{`${t.CONTRIBUTOR}: ${data.contributor}`}</Text> : <Skeleton mb= "6">loading</Skeleton>}
+          {data ? <Text mb="6">{data.description}</Text> : <Skeleton mb= "6">loading</Skeleton>}
 
           {data ? (
             <Table variant="simple">
@@ -76,7 +75,7 @@ export default function Event() {
             </Tbody>
           </Table>
           ):(
-            <Center>
+            <Center mt="10">
               <Spinner />
             </Center>
           )}
