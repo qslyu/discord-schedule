@@ -10,4 +10,9 @@ export default {
   EVENT_DESCRIPTION: "説明",
   EVENT_SCHEDULE: "日程",
   CREATE_EVENT: "作成",
+
+  // /event/[id]
+  EVENT_NOT_FOUND: "イベントが見つかりません",
+  CONTRIBUTOR: "製作者",
+
 }

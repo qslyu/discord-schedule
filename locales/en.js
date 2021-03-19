@@ -10,4 +10,9 @@ export default {
   EVENT_DESCRIPTION: "Description",
   EVENT_SCHEDULE: "Schedule",
   CREATE_EVENT: "Create",
+
+  // /event/[id]
+  EVENT_NOT_FOUND: "Event not found",
+  CONTRIBUTOR: "Contributor",
+  
 }

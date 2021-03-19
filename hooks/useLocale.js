@@ -4,17 +4,17 @@ import path from 'path'
 
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
+import isValidQuery from '../util/isValidQuery'
 
 export default function useLocale(isTopPage) {
   const router = useRouter()
   let locale = router.locale
   let t = en
 
-  const pageName = path.basename(router.asPath)
-  const isEmpty = pageName[0] == '[' && pageName.substr(-1) == ']'
+  const query = path.basename(router.asPath)
 
   useEffect(() => {
-    if(!isTopPage && !isEmpty) router.push(router.asPath, router.asPath, { locale: window.navigator.language.substr(0, 2) })
+    if(!isTopPage && isValidQuery(query)) router.push(router.asPath, router.asPath, { locale: window.navigator.language.substr(0, 2) })
   },[])
 
   if(locale == 'ja') t = ja
