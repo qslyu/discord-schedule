@@ -67,9 +67,9 @@ export default function Event() {
               {data.schedule.map((d, i) => (
                 <Tr key={i}>
                   <Td>{DateTimeFormat(d.date, locale)}〜</Td>
-                  <Td><Icon as={BsFillCircleFill} color="green.400" /> {d.users.excellent.length}</Td>
-                  <Td><Icon as={BsFillExclamationCircleFill} color="yellow.400" /> {d.users.excellent.length}</Td>
-                  <Td><Icon as={BsFillDashCircleFill} color="red.400" /> {d.users.excellent.length}</Td>
+                  <Td><Icon as={BsFillCircleFill} color="green.400" /> {d.evaluations.excellent.length}</Td>
+                  <Td><Icon as={BsFillExclamationCircleFill} color="yellow.400" /> {d.evaluations.excellent.length}</Td>
+                  <Td><Icon as={BsFillDashCircleFill} color="red.400" /> {d.evaluations.excellent.length}</Td>
                 </Tr>
               ))}
             </Tbody>
