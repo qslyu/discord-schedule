@@ -8,7 +8,7 @@ import { useRouter } from 'next/router'
 
 export default function Header() {
   const [ session, loading ] = useSession()
-  const { _, t } = useLocale()
+  const { locale, t } = useLocale()
 
   const router = useRouter()
 
@@ -16,12 +16,13 @@ export default function Header() {
     <Center>
       <Box p="6" width={{base: "100%", md: "60%"}}>
         <Flex>
-          <Center>
-            <Heading size="md" as="h1">Discord Schedule</Heading>
+          <Center onClick={() => {router.push('/', '/', {locale: locale})}}>
+            <Image mr="3" boxSize="80px" src="/logo.svg" />
           </Center>
+
           <Spacer />
 
-          <Box>
+          <Center>
             {!session && <>
               <Button onClick={() => signIn('discord')}>
                 <Skeleton isLoaded={!loading}>
@@ -46,7 +47,7 @@ export default function Header() {
                 </MenuList>
               </Menu>
             </>}
-          </Box>
+          </Center>
         </Flex>
       </Box>
     </Center>
