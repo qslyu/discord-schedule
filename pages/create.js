@@ -92,7 +92,7 @@ export default function Create() {
         <Box p="10" w={{base: "100%", md: "60%"}}>
         <Heading size="xl" as="h2">{t.NEW_EVENT}</Heading>
           <Box display={{ lg: "flex" }} mt="12">
-            <Box w={{base: "100%", lg: "48%"}}>
+            <Box w={{base: "100%", lg: "48%"}} mb="6">
               <FormControl isInvalid={showError && validateEventName(name)} isRequired>
                 <FormLabel>{t.EVENT_NAME}</FormLabel>
                 <Input value={name} w="100%" onChange={(e) => setName(e.target.value)} />

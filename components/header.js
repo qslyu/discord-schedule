@@ -23,7 +23,11 @@ export default function Header() {
 
           <Box>
             {!session && <>
-              <Button onClick={() => signIn('discord')}><Icon mr="3" as={FaDiscord} /> {t.SIGN_IN}</Button>
+              <Button onClick={() => signIn('discord')}>
+                <Skeleton isLoaded={!loading}>
+                  <Icon mr="3" as={FaDiscord} /> {t.SIGN_IN}
+                </Skeleton>
+              </Button>
             </>}
             {session && <>
               <Menu>
