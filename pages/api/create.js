@@ -26,9 +26,9 @@ export default async (req, res) => {
     schedule.sort((a,b) => {
       const ad = new Date(a).getTime()
       const bd = new Date(b).getTime()
-      if( ad < bd ) return -1;
-      if( ad > bd ) return 1;
-      return 0;
+      if( ad < bd ) return -1
+      if( ad > bd ) return 1
+      return 0
     })
 
     const escapedSchedule = []
