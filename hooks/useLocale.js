@@ -11,11 +11,13 @@ export default function useLocale(isTopPage) {
   let locale = router.locale
   let t = en
 
-  const query = path.basename(router.asPath)
+  const fullPath = router.asPath
+  const query = path.basename(fullPath)
 
   useEffect(() => {
-    if(!isTopPage && isValidQuery(query)) router.push(router.asPath, router.asPath, { locale: window.navigator.language.substr(0, 2) })
-  },[])
+    const browserLocale = window.navigator.language.substr(0, 2)
+    if(!isTopPage && isValidQuery(query) && locale != browserLocale) router.push(fullPath, fullPath, { locale: browserLocale })
+  })
 
   if(locale == 'ja') t = ja
 
