@@ -39,11 +39,15 @@ export default function Event({ data, notFound }) {
     <>
       <Head>
         <title>{data.name} - Discord Schedule</title>
+        <meta property="og:url" content={`${process.env.NEXT_PUBLIC_BASE_URL}${router.asPath}`} />
+        <meta property="og:title" content={data.name} />
+        <meta property="og:description" content={data.description} />
         <meta property="og:image" key="ogImage" content={`/api/image/${router.query.id}`} />
-        <meta name="twitter:card" key="twitterCard" content="summary_large_image" />
+        
+        <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={data.name} />
         <meta name="twitter:description" content={data.description} />
-        <meta name="twitter:image" key="twitterImage" content={`/api/image/${router.query.id}`} />
+        <meta name="twitter:image" content={`/api/image/${router.query.id}`} />
       </Head>
       <Header />
       <Center>
@@ -84,17 +88,19 @@ export default function Event({ data, notFound }) {
 }
 
 export async function getServerSideProps(context) {
-  const acceptLanguage = context.req.headers['accept-language'].substr(0, 2)
-  const { locale } = context
+  if(context.req.headers['accept-language']) {
+    const acceptLanguage = context.req.headers['accept-language'].substr(0, 2)
+    const { locale } = context
 
-  if(locale != acceptLanguage) {
-    context.res.writeHead(302, { Location: `/${acceptLanguage}${context.resolvedUrl}` })
-    context.res.end()
+    if(locale != acceptLanguage) {
+      context.res.writeHead(302, { Location: `/${acceptLanguage}${context.resolvedUrl}` })
+      context.res.end()
+    }
   }
 
   const { id } = context.query
   const { db } = await connectToDatabase()
-
+  
   let ObjId
 
   try {
