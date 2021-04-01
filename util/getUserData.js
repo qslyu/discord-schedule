@@ -1,7 +1,7 @@
 import { ObjectId } from "bson";
 import { connectToDatabase } from "./mongodb";
 
-export default async function getUserName(uid) {
+export default async function getUserData(uid) {
   const { db } = await connectToDatabase()
   
   const user = await db
@@ -10,5 +10,5 @@ export default async function getUserName(uid) {
       _id: ObjectId(uid)
     })
 
-  return user.name
+  return user
 }

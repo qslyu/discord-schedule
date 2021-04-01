@@ -1,45 +1,36 @@
 import { useRouter } from 'next/router'
 import Header from '../../components/header'
-import useSWR from 'swr'
-import { fetcher } from '../../util/fetcher'
-import { Box, Center, Heading, Stack, Text } from '@chakra-ui/layout'
+import { Box, Center, Flex, Heading, Stack, Text } from '@chakra-ui/layout'
 import { Table, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/table'
 import DateTimeFormat from '../../util/dateTimeFormat'
 import { BsFillCircleFill, BsFillExclamationCircleFill, BsFillDashCircleFill } from 'react-icons/bs'
 import Icon from '@chakra-ui/icon'
 import Head from 'next/head'
-import { Skeleton } from '@chakra-ui/skeleton'
 import useLocale from '../../hooks/useLocale'
-import isValidQuery from '../../util/isValidQuery'
-import { Spinner } from '@chakra-ui/spinner'
+import { connectToDatabase } from '../../util/mongodb'
+import { ObjectId } from 'bson'
+import getUserData from '../../util/getUserData'
+import { Input } from '@chakra-ui/input'
+import { useState } from 'react'
+import { useClipboard } from '@chakra-ui/hooks'
+import { Button } from '@chakra-ui/button'
 
-export default function Event() {
+export default function Event({ data, notFound }) {
   const router = useRouter()
-  const { id } = router.query
+
+  const [value, setValue] = useState(`${process.env.NEXT_PUBLIC_BASE_URL}${router.asPath}`)
+  const { hasCopied, onCopy } = useClipboard(value)
+
   const { locale, t } = useLocale()
 
-  const { data, error } = useSWR(isValidQuery(id)?`/api/event/${id}`:null, id?fetcher:null)
-
-  if(data && data.error == 'not found') return (
+  if(notFound) return(
     <>
       <Head>
         <title>{t.EVENT_NOT_FOUND} - Discord Schedule</title>
       </Head>
       <Header />
-      <Center mt="10">
-        <Heading size="xl" as="h2" mb= "6">{t.EVENT_NOT_FOUND}</Heading>
-      </Center>
-    </>
-  )
-
-  if(data && data.error) return (
-    <>
-      <Head>
-        <title>{t.ERROR} - Discord Schedule</title>
-      </Head>
-      <Header />
-      <Center mt="10">
-        <Heading size="xl" as="h2" mb= "6">Error</Heading>
+      <Center>
+        <Heading mt="20">{t.EVENT_NOT_FOUND}</Heading>
       </Center>
     </>
   )
@@ -47,17 +38,28 @@ export default function Event() {
   return (
     <>
       <Head>
-        <title>{data ? data.name : 'loading'} - Discord Schedule</title>
+        <title>{data.name} - Discord Schedule</title>
+        <meta property="og:image" key="ogImage" content={`/api/image/${router.query.id}`} />
+        <meta name="twitter:card" key="twitterCard" content="summary_large_image" />
+        <meta name="twitter:title" content={data.name} />
+        <meta name="twitter:description" content={data.description} />
+        <meta name="twitter:image" key="twitterImage" content={`/api/image/${router.query.id}`} />
       </Head>
       <Header />
       <Center>
         <Box p="10" w={{base: "100%", md: "60%"}}>
-          {data ? <Heading size="xl" as="h2" mb="6">{data.name}</Heading> : <Skeleton mb= "6"><Heading size="xl">loading</Heading></Skeleton>}
-          {data ? <Text mb="6">{`${t.CONTRIBUTOR}: ${data.contributor}`}</Text> : <Skeleton mb= "6">loading</Skeleton>}
-          {data ? <Text mb="6">{data.description}</Text> : <Skeleton mb= "6">loading</Skeleton>}
+          <Flex mb="10">
+            <Input value={value} isReadOnly />
+            <Button onClick={onCopy} ml="2">
+              {hasCopied ? "Copied" : "Copy"}
+            </Button>
+          </Flex>
 
-          {data ? (
-            <Table variant="simple">
+          <Heading size="xl" as="h2" mb="6">{data.name}</Heading> 
+          <Text mb="6">{`${t.CONTRIBUTOR}: ${data.contributor}`}</Text>
+          <Text mb="6">{data.description}</Text>
+
+          <Table variant="simple">
             <Thead>
               <Tr>
                 <Th /><Th /><Th /><Th />
@@ -66,7 +68,7 @@ export default function Event() {
             <Tbody>
               {data.schedule.map((d, i) => (
                 <Tr key={i}>
-                  <Td>{DateTimeFormat(d.date, locale)}〜</Td>
+                  <Td>{DateTimeFormat(d.datetime, locale)}〜</Td>
                   <Td><Icon as={BsFillCircleFill} color="green.400" /> {d.evaluations.excellent.length}</Td>
                   <Td><Icon as={BsFillExclamationCircleFill} color="yellow.400" /> {d.evaluations.excellent.length}</Td>
                   <Td><Icon as={BsFillDashCircleFill} color="red.400" /> {d.evaluations.excellent.length}</Td>
@@ -74,14 +76,59 @@ export default function Event() {
               ))}
             </Tbody>
           </Table>
-          ):(
-            <Center mt="75">
-              <Spinner />
-            </Center>
-          )}
 
         </Box>
       </Center>
     </>
   )
+}
+
+export async function getServerSideProps(context) {
+  const acceptLanguage = context.req.headers['accept-language'].substr(0, 2)
+  const { locale } = context
+
+  if(locale != acceptLanguage) {
+    context.res.writeHead(302, { Location: `/${acceptLanguage}${context.resolvedUrl}` })
+    context.res.end()
+  }
+
+  const { id } = context.query
+  const { db } = await connectToDatabase()
+
+  let ObjId
+
+  try {
+    ObjId = ObjectId(id)
+  } catch {
+    return {
+      props: {
+        notFound: true
+      }
+    }
+  }
+
+  const data = await db
+    .collection('events')
+    .findOne({
+      _id: ObjId
+    })
+
+  if(data) {
+    return {
+      props: {
+        data: JSON.parse(JSON.stringify({
+          name:         unescape(data.name),
+          description:  unescape(data.description),
+          contributor:  (await getUserData(data.contributor_id)).name,
+          schedule:     data.schedule
+        }))
+      }
+    }
+  } else {
+    return {
+      props: {
+        notFound: true
+      }
+    }
+  }
 }
