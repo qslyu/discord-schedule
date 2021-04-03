@@ -60,7 +60,7 @@ export default function Event({ data, notFound }) {
           </Flex>
 
           <Heading size="xl" as="h2" mb="6">{data.name}</Heading> 
-          <Text mb="6">{`${t.CONTRIBUTOR}: ${data.contributor}`}</Text>
+          <Text mb="6">{`${t.CONTRIBUTOR}: ${data.contributor.name}`}</Text>
           <Text mb="6">{data.description}</Text>
 
           <Table variant="simple">
@@ -73,9 +73,9 @@ export default function Event({ data, notFound }) {
               {data.schedule.map((d, i) => (
                 <Tr key={i}>
                   <Td>{DateTimeFormat(d.datetime, locale)}〜</Td>
-                  <Td><Icon as={BsFillCircleFill} color="green.400" /> {d.evaluations.excellent.length}</Td>
-                  <Td><Icon as={BsFillExclamationCircleFill} color="yellow.400" /> {d.evaluations.excellent.length}</Td>
-                  <Td><Icon as={BsFillDashCircleFill} color="red.400" /> {d.evaluations.excellent.length}</Td>
+                  <Td><Icon as={BsFillCircleFill} color="green.400" /> {d.evaluation_count.excellent}</Td>
+                  <Td><Icon as={BsFillExclamationCircleFill} color="yellow.400" /> {d.evaluation_count.average}</Td>
+                  <Td><Icon as={BsFillDashCircleFill} color="red.400" /> {d.evaluation_count.bad}</Td>
                 </Tr>
               ))}
             </Tbody>
@@ -125,7 +125,7 @@ export async function getServerSideProps(context) {
         data: JSON.parse(JSON.stringify({
           name:         unescape(data.name),
           description:  unescape(data.description),
-          contributor:  (await getUserData(data.contributor_id)).name,
+          contributor:  await getUserData(data.contributor_id),
           schedule:     data.schedule
         }))
       }
