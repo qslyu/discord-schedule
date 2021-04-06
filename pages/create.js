@@ -67,10 +67,10 @@ export default function Create() {
       body: JSON.stringify(data),
     })
     .then(response => response.json())
-    .then(data => {
+    .then(async data => {
       if(data.success) {
+        await router.push(data.url, data.url, { locale: locale })
         setIsSending(false)
-        router.push(data.url, data.url, { locale: locale })
       }
     })
     .catch(err => {
