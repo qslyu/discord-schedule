@@ -5,6 +5,7 @@ import { FaDiscord } from 'react-icons/fa'
 import useLocale from '../hooks/useLocale'
 
 import { useRouter } from 'next/router'
+import UserArea from './userArea'
 
 export default function Header() {
   const [ session, loading ] = useSession()
@@ -33,14 +34,7 @@ export default function Header() {
             {session && <>
               <Menu>
                 <MenuButton as={Button} rightIcon={<ChevronDownIcon />}>
-                  <Flex>
-                    <HStack>
-                      <Avatar size="sm" src={session.user.image} />
-                      <Center display={{base: "none", sm:"inline"}}>
-                        <Heading size="sm" as="h6">{session.user.name}</Heading>
-                      </Center>
-                    </HStack>
-                  </Flex>
+                  <UserArea userData={session.user} />
                 </MenuButton>
                 <MenuList>
                   <MenuItem onClick={() => signOut()}>{t.SIGN_OUT}</MenuItem>

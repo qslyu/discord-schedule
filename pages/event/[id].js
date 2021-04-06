@@ -14,14 +14,51 @@ import { Input } from '@chakra-ui/input'
 import { useState } from 'react'
 import { useClipboard } from '@chakra-ui/hooks'
 import { Button } from '@chakra-ui/button'
+import { Avatar } from '@chakra-ui/avatar'
+import UserArea from '../../components/userArea'
 
 export default function Event({ data, notFound }) {
   const router = useRouter()
+
+  const { id } = router.query
 
   const [value, setValue] = useState(`${process.env.NEXT_PUBLIC_BASE_URL}${router.asPath}`)
   const { hasCopied, onCopy } = useClipboard(value)
 
   const { locale, t } = useLocale()
+
+  function vote(operation, datetime, evalaution) {
+    const data = {
+      "operation": operation,
+      "id": id,
+      "datetime": datetime,
+      "evalaution": evalaution
+    }
+
+    fetch('/api/vote', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    })
+    .then(response => response.json())
+    .then(async data => {
+      if(data.success) {
+        setIsSending(false)
+      }
+    })
+    .catch(err => {
+      setIsSending(false)
+      toast({
+        title: "エラー",
+        description: "送信に失敗しました",
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+      })
+    })
+  }
 
   if(notFound) return(
     <>
@@ -60,8 +97,10 @@ export default function Event({ data, notFound }) {
           </Flex>
 
           <Heading size="xl" as="h2" mb="6">{data.name}</Heading> 
-          <Text mb="6">{`${t.CONTRIBUTOR}: ${data.contributor.name}`}</Text>
-          <Text mb="6">{data.description}</Text>
+
+          <UserArea userData={data.contributor}/>
+
+          <Text mt="6" mb="6">{data.description ? data.description : t.NO_DESCRIPTION}</Text>
 
           <Table variant="simple">
             <Thead>
@@ -73,9 +112,18 @@ export default function Event({ data, notFound }) {
               {data.schedule.map((d, i) => (
                 <Tr key={i}>
                   <Td>{DateTimeFormat(d.datetime, locale)}〜</Td>
-                  <Td><Icon as={BsFillCircleFill} color="green.400" /> {d.evaluation_count.excellent}</Td>
-                  <Td><Icon as={BsFillExclamationCircleFill} color="yellow.400" /> {d.evaluation_count.average}</Td>
-                  <Td><Icon as={BsFillDashCircleFill} color="red.400" /> {d.evaluation_count.bad}</Td>
+                  <Td>
+                    <Icon as={BsFillCircleFill} color="green.400" />
+                    {d.evaluation_count.excellent}
+                  </Td>
+                  <Td>
+                    <Icon as={BsFillExclamationCircleFill} color="yellow.400" />
+                    {d.evaluation_count.average}
+                  </Td>
+                  <Td>
+                    <Icon as={BsFillDashCircleFill} color="red.400" />
+                    {d.evaluation_count.bad}
+                  </Td>
                 </Tr>
               ))}
             </Tbody>

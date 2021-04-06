@@ -14,5 +14,5 @@ export default {
   // /event/[id]
   EVENT_NOT_FOUND: "イベントが見つかりません",
   CONTRIBUTOR: "製作者",
-
+  NO_DESCRIPTION: "説明はありません"
 }

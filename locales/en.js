@@ -14,5 +14,5 @@ export default {
   // /event/[id]
   EVENT_NOT_FOUND: "Event not found",
   CONTRIBUTOR: "Contributor",
-  
+  NO_DESCRIPTION: "No description"
 }
