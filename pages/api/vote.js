@@ -21,19 +21,19 @@ export default async (req, res) => {
       const deleted = await db
         .collection('votes')
         .findOneAndDelete({
-          userId: userId,
+          user_id: userId,
           event_id: id,
           datetime: datetime
         })
       
-      if(deleted) {
+      if(deleted.value) {
         await db
           .collection('events')
-          .update({
+          .updateOne({
             _id: ObjectId(id),
             'schedule.datetime': datetime,
           }, {
-            $inc: {[`schedule.$.evaluation_count.${deleted.evaluation}`]: -1 }
+            $inc: {[`schedule.$.evaluation_count.${deleted.value.evaluation}`]: -1 }
           })
       }
 
@@ -43,13 +43,24 @@ export default async (req, res) => {
           user_id: userId,
           event_id: id,
           datetime: datetime,
-          evaluation: evaluation
+          evaluation: evaluation,
+          createdAt: new Date(Date.now())
+        })
+
+      await db
+        .collection('events')
+        .updateOne({
+          _id: ObjectId(id),
+          'schedule.datetime': datetime,
+        }, {
+          $inc: {[`schedule.$.evaluation_count.${evaluation}`]: 1 },
+          $set: { 'schedule.$.evaluation': evaluation }
         })
     } else if (operation == "remove") {
       await db
         .collection('votes')
         .deleteOne({
-          userId: userId,
+          user_id: userId,
           event_id: id,
           datetime: datetime,
           evaluation: evaluation
@@ -57,11 +68,12 @@ export default async (req, res) => {
 
       await db
         .collection('events')
-        .update({
+        .updateOne({
           _id: ObjectId(id),
           'schedule.datetime': datetime,
         }, {
-          $inc: {[`schedule.$.evaluation_count.${evaluation}`]: 1 }
+          $inc: {[`schedule.$.evaluation_count.${evaluation}`]: -1 },
+          $set: { 'schedule.$.evaluation': '' }
         })
 
     } else {

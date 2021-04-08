@@ -34,7 +34,8 @@ export default async (req, res) => {
     const escapedSchedule = []
     schedule.map(d => {
       escapedSchedule.push({
-        datetime: new Date(d), 
+        datetime: new Date(d),
+        evaluation: '',
         evaluation_count: {
           excellent: 0,
           average: 0,

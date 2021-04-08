@@ -1,9 +1,9 @@
 import { useRouter } from 'next/router'
 import Header from '../../components/header'
-import { Box, Center, Flex, Heading, Stack, Text } from '@chakra-ui/layout'
+import { Box, Center, Flex, Heading, Stack, Text, VStack } from '@chakra-ui/layout'
 import { Table, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/table'
 import DateTimeFormat from '../../util/dateTimeFormat'
-import { BsFillCircleFill, BsFillExclamationCircleFill, BsFillDashCircleFill } from 'react-icons/bs'
+import { BsFillCircleFill, BsFillExclamationCircleFill, BsFillDashCircleFill, BsCircle, BsExclamationCircle, BsDashCircle } from 'react-icons/bs'
 import Icon from '@chakra-ui/icon'
 import Head from 'next/head'
 import useLocale from '../../hooks/useLocale'
@@ -11,11 +11,72 @@ import { connectToDatabase } from '../../util/mongodb'
 import { ObjectId } from 'bson'
 import getUserData from '../../util/getUserData'
 import { Input } from '@chakra-ui/input'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useClipboard } from '@chakra-ui/hooks'
 import { Button } from '@chakra-ui/button'
-import { Avatar } from '@chakra-ui/avatar'
 import UserArea from '../../components/userArea'
+import { useToast } from '@chakra-ui/toast'
+import { Spinner } from '@chakra-ui/spinner'
+
+function VoteButton({d, eventId, evaluation, icon, fillIcon, color}) {
+  const router = useRouter()
+  const toast = useToast()
+
+  const [isSending, setIsSending] = useState(false)
+
+  function vote(operation, datetime, evaluation) {
+    const data = {
+      "operation": operation,
+      "id": eventId,
+      "datetime": datetime,
+      "evaluation": evaluation
+    }
+
+    if(!isSending) {
+      setIsSending(true)
+
+      fetch('/api/vote', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      })
+      .then(response => response.json())
+      .then(async data => {
+        if(data.success) {
+          await router.replace(router.asPath)
+          setIsSending(false)
+        }
+      })
+      .catch(err => {
+        toast({
+          title: "エラー",
+          description: "送信に失敗しました",
+          status: "error",
+          duration: 9000,
+          isClosable: true,
+        })
+      })
+    }
+  }
+
+  return (
+    <VStack
+      onClick={() => vote(
+        d.evaluation != evaluation ? 'add' : 'remove', 
+        d.datetime, 
+        evaluation
+      )}
+    >
+      <Icon
+        as={d.evaluation == evaluation ? fillIcon : icon}
+        color={color}
+      />
+      {isSending ? <Spinner size="xs" /> : <Text>{d.evaluation_count[evaluation]}</Text>}
+    </VStack>
+  )
+}
 
 export default function Event({ data, notFound }) {
   const router = useRouter()
@@ -27,38 +88,7 @@ export default function Event({ data, notFound }) {
 
   const { locale, t } = useLocale()
 
-  function vote(operation, datetime, evalaution) {
-    const data = {
-      "operation": operation,
-      "id": id,
-      "datetime": datetime,
-      "evalaution": evalaution
-    }
 
-    fetch('/api/vote', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-    .then(response => response.json())
-    .then(async data => {
-      if(data.success) {
-        setIsSending(false)
-      }
-    })
-    .catch(err => {
-      setIsSending(false)
-      toast({
-        title: "エラー",
-        description: "送信に失敗しました",
-        status: "error",
-        duration: 9000,
-        isClosable: true,
-      })
-    })
-  }
 
   if(notFound) return(
     <>
@@ -113,16 +143,34 @@ export default function Event({ data, notFound }) {
                 <Tr key={i}>
                   <Td>{DateTimeFormat(d.datetime, locale)}〜</Td>
                   <Td>
-                    <Icon as={BsFillCircleFill} color="green.400" />
-                    {d.evaluation_count.excellent}
+                    <VoteButton 
+                      d={d} 
+                      eventId={id} 
+                      evaluation='excellent'
+                      icon={BsCircle} 
+                      fillIcon={BsFillCircleFill} 
+                      color="green.400" 
+                    />
                   </Td>
                   <Td>
-                    <Icon as={BsFillExclamationCircleFill} color="yellow.400" />
-                    {d.evaluation_count.average}
+                    <VoteButton 
+                      d={d} 
+                      eventId={id} 
+                      evaluation='average'
+                      icon={BsExclamationCircle} 
+                      fillIcon={BsFillExclamationCircleFill} 
+                      color="yellow.400"
+                    />
                   </Td>
                   <Td>
-                    <Icon as={BsFillDashCircleFill} color="red.400" />
-                    {d.evaluation_count.bad}
+                    <VoteButton 
+                      d={d} 
+                      eventId={id} 
+                      evaluation='bad'
+                      icon={BsDashCircle} 
+                      fillIcon={BsFillDashCircleFill} 
+                      color="red.400"
+                    />
                   </Td>
                 </Tr>
               ))}

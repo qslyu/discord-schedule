@@ -1,5 +1,5 @@
-import { ObjectId } from "bson";
-import { connectToDatabase } from "./mongodb";
+import { ObjectId } from "bson"
+import { connectToDatabase } from "./mongodb"
 
 export default async function getUserData(uid) {
   const { db } = await connectToDatabase()
