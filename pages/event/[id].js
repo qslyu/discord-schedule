@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router'
 import Header from '../../components/header'
-import { Box, Center, Flex, Heading, Stack, Text, VStack } from '@chakra-ui/layout'
+import { Box, Center, Flex, Heading, Link, Stack, Text, VStack } from '@chakra-ui/layout'
 import { Table, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/table'
 import DateTimeFormat from '../../util/dateTimeFormat'
 import { BsFillCircleFill, BsFillExclamationCircleFill, BsFillDashCircleFill, BsCircle, BsExclamationCircle, BsDashCircle } from 'react-icons/bs'
@@ -12,20 +12,25 @@ import { ObjectId } from 'bson'
 import getUserData from '../../util/getUserData'
 import { Input } from '@chakra-ui/input'
 import { useEffect, useState } from 'react'
-import { useClipboard } from '@chakra-ui/hooks'
+import { useClipboard, useDisclosure } from '@chakra-ui/hooks'
 import { Button } from '@chakra-ui/button'
 import UserArea from '../../components/userArea'
 import { useToast } from '@chakra-ui/toast'
 import { Spinner } from '@chakra-ui/spinner'
 import { getSession } from 'next-auth/client'
+import { Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay } from '@chakra-ui/modal'
+import { fetcher } from '../../util/fetcher' 
 
 function VoteButton({d, eventId, evaluation, icon, fillIcon, color}) {
   const router = useRouter()
   const toast = useToast()
 
+  const { isOpen, onOpen, onClose } = useDisclosure()
   const [isSending, setIsSending] = useState(false)
+  const [votedUsers, setVotedUsers] = useState('loading')
 
   function vote(operation, datetime, evaluation) {
+
     const data = {
       "operation": operation,
       "id": eventId,
@@ -36,14 +41,13 @@ function VoteButton({d, eventId, evaluation, icon, fillIcon, color}) {
     if(!isSending) {
       setIsSending(true)
 
-      fetch('/api/vote', {
+      fetcher('/api/vote', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(data),
       })
-      .then(response => response.json())
       .then(async data => {
         if(data.success) {
           await router.replace(router.asPath)
@@ -63,23 +67,51 @@ function VoteButton({d, eventId, evaluation, icon, fillIcon, color}) {
   }
 
   return (
-    <VStack
-      onClick={async() => {
-        const session = await getSession()
+    <>
+      <VStack>
+        <Icon
+          onClick={async() => {
+            const session = await getSession()
 
-        if(session) vote(
-          d.evaluation != evaluation ? 'add' : 'remove', 
-          d.datetime, 
-          evaluation
-        )
-      }}
-    >
-      <Icon
-        as={d.evaluation == evaluation ? fillIcon : icon}
-        color={color}
-      />
-      {isSending ? <Spinner size="xs" /> : <Text>{d.count[evaluation]}</Text>}
-    </VStack>
+            if(session) vote(
+              d.evaluation != evaluation ? 'add' : 'remove', 
+              d.datetime,
+              evaluation
+            )
+          }}
+          as={d.evaluation == evaluation ? fillIcon : icon}
+          color={color}
+        />
+        {isSending ? <Spinner size="xs" /> : <Link
+          onClick={async () => {
+            onOpen()
+            setVotedUsers(await fetcher(`/api/votes?id=${eventId}&datetime=${d.datetime}&evaluation=${evaluation}`))
+          }}
+        >{d.count[evaluation]}</Link>}
+      </VStack>
+
+
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>投票したユーザー</ModalHeader>
+          <ModalCloseButton onClick={() => setVotedUsers('loading')} />
+          <ModalBody>
+            {votedUsers == 'loading' ? (
+              <Center mb={2}>
+                <Spinner />
+              </Center>
+            ) : (
+              votedUsers.map(user => (
+                <Box mb={2}>
+                  <UserArea userData={user} />
+                </Box>
+              ))
+            )}
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+    </>
   )
 }
 
@@ -181,7 +213,6 @@ export default function Event({ data, notFound }) {
               ))}
             </Tbody>
           </Table>
-
         </Box>
       </Center>
     </>
