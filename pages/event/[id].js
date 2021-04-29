@@ -199,7 +199,6 @@ export async function getServerSideProps(context) {
   const { db } = await connectToDatabase()
   const session = await getSession(context)
 
-  const userId = session.user.uid
   let ObjId
 
   try {
@@ -222,15 +221,19 @@ export async function getServerSideProps(context) {
     const schedule = await Promise.all(data.schedule.map(async d => {
       const datetime = new Date(d)
 
-      const vote = await db
+      let evaluation = ''
+
+      if(session) {
+        const vote = await db
         .collection('votes')
         .findOne({
-          user_id: userId,
+          user_id: session.user.uid,
           event_id: ObjectId(id),
           datetime: datetime,
         })
 
-      let evaluation = vote ? vote.evaluation : ''
+        evaluation = vote ? vote.evaluation : ''
+      }
 
       const excellentCount = await db
         .collection('votes')
