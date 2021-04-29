@@ -64,11 +64,15 @@ function VoteButton({d, eventId, evaluation, icon, fillIcon, color}) {
 
   return (
     <VStack
-      onClick={() => vote(
-        d.evaluation != evaluation ? 'add' : 'remove', 
-        d.datetime, 
-        evaluation
-      )}
+      onClick={async() => {
+        const session = await getSession()
+
+        if(session) vote(
+          d.evaluation != evaluation ? 'add' : 'remove', 
+          d.datetime, 
+          evaluation
+        )
+      }}
     >
       <Icon
         as={d.evaluation == evaluation ? fillIcon : icon}

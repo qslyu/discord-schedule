@@ -55,5 +55,6 @@ export default async (req, res) => {
 
   } else {
     res.status(401)
+    res.send({ "error": "Not logged in" })
   }
 }
