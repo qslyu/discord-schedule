@@ -62,5 +62,5 @@ export default NextAuth({
     signingKey: process.env.JWT_SIGNING_PRIVATE_KEY,
   },
   
-  database: process.env.DATABASE_URL,
+  database: process.env.DATABASE_URI,
 })
