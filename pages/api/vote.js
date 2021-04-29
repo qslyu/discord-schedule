@@ -11,32 +11,21 @@ export default async (req, res) => {
 
     const userId = session.user.uid
     const operation = req.body.operation
-    const id = req.body.id
+    const id = ObjectId(req.body.id)
     const datetime = new Date(req.body.datetime)
     const evaluation = req.body.evaluation
 
-    if(validateDatetime())
+    // バリデートする
 
     if(operation == 'add') {
-      const deleted = await db
+      await db
         .collection('votes')
-        .findOneAndDelete({
+        .deleteOne({
           user_id: userId,
           event_id: id,
           datetime: datetime
         })
       
-      if(deleted.value) {
-        await db
-          .collection('events')
-          .updateOne({
-            _id: ObjectId(id),
-            'schedule.datetime': datetime,
-          }, {
-            $inc: {[`schedule.$.evaluation_count.${deleted.value.evaluation}`]: -1 }
-          })
-      }
-
       await db
         .collection('votes')
         .insertOne({
@@ -47,15 +36,6 @@ export default async (req, res) => {
           createdAt: new Date(Date.now())
         })
 
-      await db
-        .collection('events')
-        .updateOne({
-          _id: ObjectId(id),
-          'schedule.datetime': datetime,
-        }, {
-          $inc: {[`schedule.$.evaluation_count.${evaluation}`]: 1 },
-          $set: { 'schedule.$.evaluation': evaluation }
-        })
     } else if (operation == "remove") {
       await db
         .collection('votes')
@@ -64,16 +44,6 @@ export default async (req, res) => {
           event_id: id,
           datetime: datetime,
           evaluation: evaluation
-        })
-
-      await db
-        .collection('events')
-        .updateOne({
-          _id: ObjectId(id),
-          'schedule.datetime': datetime,
-        }, {
-          $inc: {[`schedule.$.evaluation_count.${evaluation}`]: -1 },
-          $set: { 'schedule.$.evaluation': '' }
         })
 
     } else {

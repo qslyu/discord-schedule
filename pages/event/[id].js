@@ -17,6 +17,7 @@ import { Button } from '@chakra-ui/button'
 import UserArea from '../../components/userArea'
 import { useToast } from '@chakra-ui/toast'
 import { Spinner } from '@chakra-ui/spinner'
+import { getSession } from 'next-auth/client'
 
 function VoteButton({d, eventId, evaluation, icon, fillIcon, color}) {
   const router = useRouter()
@@ -73,7 +74,7 @@ function VoteButton({d, eventId, evaluation, icon, fillIcon, color}) {
         as={d.evaluation == evaluation ? fillIcon : icon}
         color={color}
       />
-      {isSending ? <Spinner size="xs" /> : <Text>{d.evaluation_count[evaluation]}</Text>}
+      {isSending ? <Spinner size="xs" /> : <Text>{d.count[evaluation]}</Text>}
     </VStack>
   )
 }
@@ -196,7 +197,9 @@ export async function getServerSideProps(context) {
 
   const { id } = context.query
   const { db } = await connectToDatabase()
-  
+  const session = await getSession(context)
+
+  const userId = session.user.uid
   let ObjId
 
   try {
@@ -216,13 +219,60 @@ export async function getServerSideProps(context) {
     })
 
   if(data) {
+    const schedule = await Promise.all(data.schedule.map(async d => {
+      const datetime = new Date(d)
+
+      const vote = await db
+        .collection('votes')
+        .findOne({
+          user_id: userId,
+          event_id: ObjectId(id),
+          datetime: datetime,
+        })
+
+      let evaluation = vote ? vote.evaluation : ''
+
+      const excellentCount = await db
+        .collection('votes')
+        .find({
+          event_id: ObjectId(id),
+          datetime: datetime,
+          evaluation: 'excellent'
+        })
+        .count()
+
+      const averageCount = await db
+        .collection('votes')
+        .find({
+          event_id: ObjectId(id),
+          datetime: datetime,
+          evaluation: 'average'
+        })
+        .count()
+
+      const badCount = await db
+        .collection('votes')
+        .find({
+          event_id: ObjectId(id),
+          datetime: datetime,
+          evaluation: 'bad'
+        })
+        .count()
+
+      return {
+        datetime: datetime,
+        evaluation: evaluation,
+        count: { excellent: excellentCount, average: averageCount, bad: badCount }
+      }
+    }))
+
     return {
       props: {
         data: JSON.parse(JSON.stringify({
           name:         unescape(data.name),
           description:  unescape(data.description),
           contributor:  await getUserData(data.contributor_id),
-          schedule:     data.schedule
+          schedule:     schedule
         }))
       }
     }
