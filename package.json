@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "vercel-build": "yum install libuuid-devel libmount-devel zlib && cp /lib64/{libuuid,libmount,libblkid,libz}.so.1 node_modules/canvas/build/Release/ && next build",
+    "vercel-build": "yum install -y google-noto-* && next build",
     "dev": "next dev",
     "build": "next build",
     "start": "next start"
