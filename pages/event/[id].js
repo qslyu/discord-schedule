@@ -70,6 +70,9 @@ function VoteButton({d, eventId, evaluation, icon, fillIcon, color}) {
     <>
       <VStack>
         <Icon
+          style={{
+            cursor: 'pointer'
+          }}
           onClick={async() => {
             const session = await getSession()
 
@@ -81,6 +84,10 @@ function VoteButton({d, eventId, evaluation, icon, fillIcon, color}) {
           }}
           as={d.evaluation == evaluation ? fillIcon : icon}
           color={color}
+          p={2}
+          m={-2}
+          w={8}
+          h={8}
         />
         {isSending ? <Spinner size="xs" /> : <Link
           onClick={async () => {
